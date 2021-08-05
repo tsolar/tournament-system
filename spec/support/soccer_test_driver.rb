@@ -7,7 +7,7 @@ class SoccerTestDriver < TestDriver
     super(options)
     @scores = options[:scores] || scores_from_winners(@teams, @winners)
     @matches = options[:matches] || @winners.keys.to_a
-    @ranked_teams = options[:ranked_teams] || @teams.sort_by { |t| @scores[t] }
+    @ranked_teams = options[:ranked_teams] || @teams.sort_by { |t| @scores[t] }.reverse # Highest score on top
     @team_matches = options[:team_matches] || build_team_matches_from_matches
   end
 
