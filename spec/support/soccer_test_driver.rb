@@ -15,8 +15,13 @@ class SoccerTestDriver < TestDriver
 
   def scores_from_winners(_teams, winners)
     scores = Hash.new(0)
-    winners.each do |_match, winner|
-      scores[winner] += 3
+    winners.each do |match, winner|
+      if winner.nil?
+        scores[match[0]] += 1
+        scores[match[1]] += 1
+      else
+        scores[winner] += 3
+      end
     end
     scores
   end

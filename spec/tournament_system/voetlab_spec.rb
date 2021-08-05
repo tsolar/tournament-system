@@ -114,6 +114,27 @@ describe TournamentSystem::Voetlab do
         [2, 3], [4, nil], [5, 1],
       ]
     end
+
+    it 'gives expected results in scenario 1' do
+      driver = SoccerTestDriver.new(
+        teams: [1, 2, 3, 4, 5],
+        winners: {
+          [2, 5] => 5, [3, 4] => 4, [1, nil] => 1,
+          [1, 5] => nil, [2, 3] => 3, [4, nil] => 4,
+          [1, 3] => nil, [4, 2] => nil, [5, nil] => 5,
+          [1, 2] => nil, [4, 5] => 4, [3, nil] => 3,
+          [1, 4] => 1, [3, 5] => nil, [2, nil] => 2,
+        }
+      )
+
+      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
+                                                 pair_options: { push_byes_to: :lowest_score })
+
+      # Since this is a new lap of round robin, teams should again be matched solely based on score
+      expect(matches).to eq [
+        [3, 5], [1, 4], [2, nil],
+      ]
+    end
   end
 
   describe '#available_round_robin_rounds' do
@@ -241,6 +262,24 @@ describe TournamentSystem::Voetlab do
         expect(rounds.to_set).to eq Set[
           Set[Set[1, nil], Set[4, 5], Set[2, 3]]
         ]
+      end
+    end
+
+    context 'sixth round' do
+      let(:matches) do
+        [
+          [1, 2], [3, 4], [5, nil],
+          [1, 3], [5, 2], [4, nil],
+          [1, 4], [3, 5], [2, nil],
+          [1, 5], [3, nil], [4, 2],
+          [1, nil], [4, 5], [2, 3],
+        ]
+      end
+
+      it 'returns all possible matches' do
+        rounds = described_class.available_round_robin_rounds(driver)
+
+        expect(rounds.count).to eq 5 * 3 * 1
       end
     end
   end
