@@ -243,5 +243,23 @@ describe TournamentSystem::Voetlab do
         ]
       end
     end
+
+    context 'sixth round' do
+      let(:matches) do
+        [
+          [1, 2], [3, 4], [5, nil],
+          [1, 3], [5, 2], [4, nil],
+          [1, 4], [3, 5], [2, nil],
+          [1, 5], [3, nil], [4, 2],
+          [1, nil], [4, 5], [2, 3],
+        ]
+      end
+
+      it 'returns all possible matches' do
+        rounds = described_class.available_round_robin_rounds(driver)
+
+        expect(rounds.count).to eq 5 * 3 * 1
+      end
+    end
   end
 end
