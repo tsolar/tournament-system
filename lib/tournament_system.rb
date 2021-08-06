@@ -9,6 +9,7 @@ require 'tournament_system/double_elimination'
 require 'tournament_system/voetlab'
 
 require 'tournament_system/planner/simple_planner'
+require 'tournament_system/planner/even_distribution_planner'
 
 # This library is split into two parts, there's the actual algorithms that implement various tournament systems
 # ({Algorithm}) and a data abstraction layer for generating matches using various tournament systems in a
