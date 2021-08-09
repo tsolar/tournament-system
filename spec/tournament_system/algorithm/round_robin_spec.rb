@@ -51,4 +51,32 @@ describe TournamentSystem::Algorithm::RoundRobin do
       expect(matches).to eq([[1, 2], [3, 4]])
     end
   end
+
+  describe '#matches_form_round_robin' do
+    it 'works in scenario 1' do
+      matches = [
+        [1, 3], [1, 5], [3, 5],
+        [2, 4], [2, 6], [4, 6],
+      ]
+
+      expect(described_class.matches_form_round_robin(matches)).to be false
+    end
+
+    it 'works in scenario 2' do
+      matches = [
+        [1, 2], [2, 4], [3, 4], [1, 4],
+        [5, 6], [6, 8], [7, 8], [5, 7],
+      ]
+
+      expect(described_class.matches_form_round_robin(matches)).to be true
+    end
+
+    it 'works in scenario 3' do
+      matches = [
+        [1, 4], [1, 5], [3, 5], [3, 6], [2, 6], [2, 4],
+      ]
+
+      expect(described_class.matches_form_round_robin(matches)).to be true
+    end
+  end
 end

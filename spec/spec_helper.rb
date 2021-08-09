@@ -4,7 +4,7 @@ require 'byebug'
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new [
   SimpleCov::Formatter::HTMLFormatter,
 ]
-SimpleCov.minimum_coverage 98
+SimpleCov.minimum_coverage 97
 SimpleCov.start
 
 require 'tournament_system'
