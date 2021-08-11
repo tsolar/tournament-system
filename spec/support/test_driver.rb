@@ -34,7 +34,7 @@ class TestDriver < TournamentSystem::Driver
   end
 
   def get_match_teams(match)
-    match
+    Array.new(match)
   end
 
   def get_match_winner(match)

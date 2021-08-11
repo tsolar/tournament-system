@@ -18,7 +18,7 @@ describe TournamentSystem::Voetlab do
                                                  pair_options: { push_byes_to: :lowest_score })
 
       expect(matches).to eq [
-        [3, 5], [1, 4], [2, nil],
+        [5, 3], [4, 1], [2, nil],
       ]
     end
 
@@ -30,7 +30,7 @@ describe TournamentSystem::Voetlab do
 
       # Should match strongest teams together
       expect(matches).to eq [
-        [2, 1], [5, nil], [3, 4],
+        [1, 2], [3, 4], [5, nil],
       ]
     end
 
@@ -46,7 +46,7 @@ describe TournamentSystem::Voetlab do
       # Should pit winners against winners and losers against losers
       # with a bye for the team with the lowest score
       expect(matches).to eq [
-        [2, nil], [3, 1], [4, 5],
+        [3, 1], [5, 4], [2, nil],
       ]
     end
 
@@ -60,7 +60,7 @@ describe TournamentSystem::Voetlab do
                                                  pair_options: { push_byes_to: :lowest_score })
 
       expect(matches).to eq [
-        [3, 1], [2, 5], [4, nil],
+        [5, 3], [2, nil], [1, 4],
       ]
     end
 
@@ -75,7 +75,7 @@ describe TournamentSystem::Voetlab do
                                                  pair_options: { push_byes_to: :lowest_score })
 
       expect(matches).to eq [
-        [3, 5], [1, 4], [2, nil],
+        [5, 3], [1, 4], [2, nil],
       ]
     end
 
@@ -90,7 +90,7 @@ describe TournamentSystem::Voetlab do
                                                  pair_options: { push_byes_to: :lowest_score })
 
       expect(matches).to eq [
-        [3, 2], [1, nil], [4, 5],
+        [5, 4], [1, nil], [3, 2],
       ]
     end
 
@@ -111,7 +111,7 @@ describe TournamentSystem::Voetlab do
 
       # Since this is a new lap of round robin, teams should again be matched solely based on score
       expect(matches).to eq [
-        [2, 3], [4, nil], [5, 1],
+        [5, 1], [3, 2], [4, nil],
       ]
     end
 
@@ -132,155 +132,85 @@ describe TournamentSystem::Voetlab do
 
       # Since this is a new lap of round robin, teams should again be matched solely based on score
       expect(matches).to eq [
-        [3, 5], [1, 4], [2, nil],
+        [4, 1], [5, 3], [2, nil],
+      ]
+    end
+
+    it 'works with many teams' do
+      driver = TestDriver.new(
+        teams: (1..32).to_a,
+        ranked_teams: (1..32).to_a
+      )
+
+      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
+                                                 pair_options: { push_byes_to: :lowest_score })
+
+      # Since this is a new lap of round robin, teams should again be matched solely based on score
+      expect(matches).to eq [
+        [1, 2], [3, 4], [5, 6],
+        [7, 8], [9, 10], [11, 12],
+        [13, 14], [15, 16], [17, 18],
+        [19, 20], [21, 22], [23, 24],
+        [25, 26], [27, 28], [29, 30],
+        [31, 32],
       ]
     end
   end
 
-  describe '#available_round_robin_rounds' do
-    let(:teams) { [1, 2, 3, 4, 5] }
-    let(:matches) { [] }
-    let(:driver) { TestDriver.new(teams: teams, matches: matches) }
+  describe '#match_teams' do
+    it 'generates the correct matches' do
+      driver = TestDriver.new(teams: [1, 2, 3, 4, 5, 6])
 
-    context 'first round' do
-      it 'returns all possible rounds' do
-        rounds = described_class.available_round_robin_rounds(driver)
-
-        # In the first rounds, all possible permutations of teams should still be possible
-        teams.permutation.each do |_ordered_teams|
-          expect(rounds).to include Set[Set[teams[0], teams[1]], Set[teams[2], teams[3]], Set[teams[4], nil]]
-        end
-      end
+      enum = described_class.match_teams(driver)
+      rounds = enum.to_a
+      expect(rounds.count).to eq 5 * 3 * 1
+      expect(rounds.shift).to eq [Set[1, 2], Set[3, 4], Set[5, 6]]
+      expect(rounds.shift).to eq [Set[1, 2], Set[3, 5], Set[4, 6]]
+      expect(rounds.shift).to eq [Set[1, 2], Set[3, 6], Set[4, 5]]
+      expect(rounds.shift).to eq [Set[1, 3], Set[2, 4], Set[5, 6]]
+      expect(rounds.shift).to eq [Set[1, 3], Set[2, 5], Set[4, 6]]
+      expect(rounds.shift).to eq [Set[1, 3], Set[2, 6], Set[4, 5]]
+      expect(rounds.shift).to eq [Set[1, 4], Set[2, 3], Set[5, 6]]
+      expect(rounds.shift).to eq [Set[1, 4], Set[2, 5], Set[3, 6]]
+      expect(rounds.shift).to eq [Set[1, 4], Set[2, 6], Set[3, 5]]
+      expect(rounds.shift).to eq [Set[1, 5], Set[2, 3], Set[4, 6]]
+      expect(rounds.shift).to eq [Set[1, 5], Set[2, 4], Set[3, 6]]
+      expect(rounds.shift).to eq [Set[1, 5], Set[2, 6], Set[3, 4]]
+      expect(rounds.shift).to eq [Set[1, 6], Set[2, 3], Set[4, 5]]
+      expect(rounds.shift).to eq [Set[1, 6], Set[2, 4], Set[3, 5]]
+      expect(rounds.shift).to eq [Set[1, 6], Set[2, 5], Set[3, 4]]
     end
 
-    context 'second round' do
-      let(:matches) { [[1, 2], [3, 4], [5, nil]] }
+    it 'generates the correct matches with some matches played' do
+      driver = TestDriver.new(teams: [1, 2, 3, 4, 5, 6], matches: [[1, 4], [2, 3], [5, 6]])
 
-      it 'returns only valid rounds' do
-        rounds = described_class.available_round_robin_rounds(driver)
-
-        # Should not include any of the played matches
-        rounds.each do |round|
-          expect(round).not_to include Set[1, 2]
-          expect(round).not_to include Set[3, 4]
-          expect(round).not_to include Set[5, nil]
-        end
-
-        # First permutation ("team 1 locked in place")
-        expect(rounds).to include Set[Set[1, 3], Set[5, 2], Set[nil, 4]]
-        expect(rounds).to include Set[Set[1, 5], Set[nil, 3], Set[4, 2]]
-        expect(rounds).to include Set[Set[1, nil], Set[4, 5], Set[2, 3]]
-        expect(rounds).to include Set[Set[1, 4], Set[2, nil], Set[3, 5]]
-
-        # Second permutation ("team 2 locked in place")
-        expect(rounds).to include Set[Set[3, 2], Set[5, 1], Set[nil, 4]]
-        expect(rounds).to include Set[Set[5, 2], Set[nil, 3], Set[4, 1]]
-        expect(rounds).to include Set[Set[nil, 2], Set[4, 5], Set[1, 3]]
-        expect(rounds).to include Set[Set[4, 2], Set[1, nil], Set[3, 5]]
-
-        # ...four more permutations not tested
-
-        # FIXME: Test Team 1 should be able to play against every team (except 2)
-      end
+      enum = described_class.match_teams(driver)
+      rounds = enum.to_a
+      expect(rounds.shift).to eq [Set[1, 2], Set[3, 5], Set[4, 6]]
+      expect(rounds.shift).to eq [Set[1, 2], Set[3, 6], Set[4, 5]]
+      expect(rounds.shift).to eq [Set[1, 3], Set[2, 5], Set[4, 6]]
+      expect(rounds.shift).to eq [Set[1, 3], Set[2, 6], Set[4, 5]]
+      expect(rounds.shift).to eq [Set[1, 5], Set[2, 4], Set[3, 6]]
+      expect(rounds.shift).to eq [Set[1, 5], Set[2, 6], Set[3, 4]]
+      expect(rounds.shift).to eq [Set[1, 6], Set[2, 4], Set[3, 5]]
+      expect(rounds.shift).to eq [Set[1, 6], Set[2, 5], Set[3, 4]]
     end
+  end
 
-    context 'third round' do
-      let(:matches) { [[1, 2], [3, 4], [5, nil], [1, 3], [5, 2], [4, nil]] }
+  describe '#all_matches' do
+    it 'generated all matches' do
+      driver = TestDriver.new(teams: [1, 2, 3, 4, 5, 6], matches: [[1, 4], [2, 3], [5, 6]])
 
-      it 'returns only valid rounds' do
-        rounds = described_class.available_round_robin_rounds(driver)
+      matches = described_class.all_matches(driver).to_a
+      expect(matches.count).to eq 15
 
-        # Should not include any of the played matches
-        rounds.each do |round|
-          expect(round).not_to include Set[1, 2]
-          expect(round).not_to include Set[3, 4]
-          expect(round).not_to include Set[5, nil]
-          expect(round).not_to include Set[1, 3]
-          expect(round).not_to include Set[5, 2]
-          expect(round).not_to include Set[4, nil]
-        end
-
-        # Only a single round robin permutation remains
-        expect(rounds.to_set).to eq Set[
-          Set[Set[1, 5], Set[nil, 3], Set[4, 2]],
-          Set[Set[1, nil], Set[4, 5], Set[2, 3]],
-          Set[Set[1, 4], Set[2, nil], Set[3, 5]]
-        ]
-      end
-    end
-
-    context 'fourth round' do
-      let(:matches) { [[1, 2], [3, 4], [5, nil], [1, 3], [5, 2], [4, nil], [1, 4], [3, 5], [2, nil]] }
-
-      it 'returns only valid rounds' do
-        rounds = described_class.available_round_robin_rounds(driver)
-
-        # Should not include any of the played matches
-        rounds.each do |round|
-          expect(round).not_to include Set[1, 2]
-          expect(round).not_to include Set[3, 4]
-          expect(round).not_to include Set[5, nil]
-          expect(round).not_to include Set[1, 3]
-          expect(round).not_to include Set[5, 2]
-          expect(round).not_to include Set[4, nil]
-          expect(round).not_to include Set[1, 4]
-          expect(round).not_to include Set[3, 5]
-          expect(round).not_to include Set[2, nil]
-        end
-
-        expect(rounds.to_set).to eq Set[
-          Set[Set[1, 5], Set[nil, 3], Set[4, 2]],
-          Set[Set[1, nil], Set[4, 5], Set[2, 3]]
-        ]
-      end
-    end
-
-    context 'fifth round' do
-      let(:matches) do
-        [[1, 2], [3, 4], [5, nil], [1, 3], [5, 2], [4, nil], [1, 4], [3, 5], [2, nil], [1, 5], [3, nil], [4, 2]]
-      end
-
-      it 'returns only valid rounds' do
-        rounds = described_class.available_round_robin_rounds(driver)
-
-        # Should not include any of the played matches
-        rounds.each do |round|
-          expect(round).not_to include Set[1, 2]
-          expect(round).not_to include Set[3, 4]
-          expect(round).not_to include Set[5, nil]
-          expect(round).not_to include Set[1, 3]
-          expect(round).not_to include Set[5, 2]
-          expect(round).not_to include Set[4, nil]
-          expect(round).not_to include Set[1, 4]
-          expect(round).not_to include Set[3, 5]
-          expect(round).not_to include Set[2, nil]
-          expect(round).not_to include Set[1, 5]
-          expect(round).not_to include Set[3, nil]
-          expect(round).not_to include Set[4, 2]
-        end
-
-        expect(rounds.to_set).to eq Set[
-          Set[Set[1, nil], Set[4, 5], Set[2, 3]]
-        ]
-      end
-    end
-
-    context 'sixth round' do
-      let(:matches) do
-        [
-          [1, 2], [3, 4], [5, nil],
-          [1, 3], [5, 2], [4, nil],
-          [1, 4], [3, 5], [2, nil],
-          [1, 5], [3, nil], [4, 2],
-          [1, nil], [4, 5], [2, 3],
-        ]
-      end
-
-      it 'returns all possible matches' do
-        rounds = described_class.available_round_robin_rounds(driver)
-
-        expect(rounds.count).to eq 5 * 3 * 1
-      end
+      expect(matches).to eq [
+        Set[1, 2], Set[1, 3], Set[1, 4],
+        Set[1, 5], Set[1, 6], Set[2, 3],
+        Set[2, 4], Set[2, 5], Set[2, 6],
+        Set[3, 4], Set[3, 5], Set[3, 6],
+        Set[4, 5], Set[4, 6], Set[5, 6],
+      ]
     end
   end
 end

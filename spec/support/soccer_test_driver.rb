@@ -20,9 +20,14 @@ class SoccerTestDriver < TestDriver
         scores[match[0]] += 1
         scores[match[1]] += 1
       else
-        scores[winner] += 3
+        # FIXME: Should implement ranking based on goals scored
+        scores[winner] += (bye?(match) ? 2.99 : 3.00)
       end
     end
     scores
+  end
+
+  def bye?(match)
+    match[0].nil? || match[1].nil?
   end
 end

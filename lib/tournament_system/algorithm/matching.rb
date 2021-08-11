@@ -32,7 +32,7 @@ module TournamentSystem
           return
         end
 
-        array[1..-1].combination(1) do |group|
+        array[1..].combination(1) do |group|
           group.unshift array[0]
 
           remaining = array.reject { |element| group.include?(element) }

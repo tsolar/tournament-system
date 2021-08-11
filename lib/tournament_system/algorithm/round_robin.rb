@@ -1,5 +1,7 @@
 require 'tournament_system/algorithm/util'
 require 'tournament_system/algorithm/group_pairing'
+require 'graph_matching'
+require 'graph_matching/integer_vertexes'
 
 module TournamentSystem
   module Algorithm
@@ -31,7 +33,7 @@ module TournamentSystem
       # @param array [Array<>] array to rotate
       # @param round [Integer] the round number, ie. amount to rotate by
       def round_robin(array, round)
-        rotateable = array[1..-1]
+        rotateable = array[1..]
 
         [array[0]] + rotateable.rotate(-round)
       end
@@ -54,6 +56,36 @@ module TournamentSystem
         rotated = round_robin(teams, round)
 
         GroupPairing.fold(rotated)
+      end
+
+      # Determines whether a set of matches can be played in round
+      # robin fashion, i.e. with every team playing every round
+      #
+      # FIXME: Maybe this is always true as long as there are no subgraphs with an
+      # uneven number of vertices
+      def matches_form_round_robin(matches) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+        teams = Set.new
+        graph = GraphMatching::Graph::Graph.new
+        matches.each do |match|
+          teams.merge(match)
+          graph.add_edge(*match)
+        end
+
+        if !graph.connected?
+          graph.each_connected_component do |subgraph|
+            edges = graph.edges.select do |match|
+              # Will always also include match[1] because the subgraph contains all connected vertices
+              subgraph.include?(match[0])
+            end
+            valid_rr = matches_form_round_robin(edges.map(&:to_a))
+            return false unless valid_rr
+          end
+          true
+        else
+          integer_graph, _legend = GraphMatching::IntegerVertexes.to_integers(graph)
+          matching = integer_graph.maximum_cardinality_matching
+          matching.edges.size == (teams.size.to_f / 2).ceil
+        end
       end
     end
   end
