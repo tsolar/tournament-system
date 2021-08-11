@@ -142,8 +142,7 @@ describe TournamentSystem::Voetlab do
         ranked_teams: (1..32).to_a
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       # Since this is a new lap of round robin, teams should again be matched solely based on score
       expect(matches).to eq [
@@ -153,6 +152,38 @@ describe TournamentSystem::Voetlab do
         [19, 20], [21, 22], [23, 24],
         [25, 26], [27, 28], [29, 30],
         [31, 32],
+      ]
+
+      driver = TestDriver.new(
+        teams: driver.teams, ranked_teams: driver.ranked_teams, matches: driver.matches + matches
+      )
+
+      matches = described_class.generate(driver)
+
+      # Since this is a new lap of round robin, teams should again be matched solely based on score
+      expect(matches).to eq [
+        [1, 3], [2, 4], [5, 7],
+        [6, 8], [9, 11], [10, 12],
+        [13, 15], [14, 16], [17, 19],
+        [18, 20], [21, 23], [22, 24],
+        [25, 27], [26, 28], [29, 31],
+        [30, 32],
+      ]
+
+      driver = TestDriver.new(
+        teams: driver.teams, ranked_teams: driver.ranked_teams, matches: driver.matches + matches
+      )
+
+      matches = described_class.generate(driver)
+
+      # Since this is a new lap of round robin, teams should again be matched solely based on score
+      expect(matches).to eq [
+        [1, 4], [2, 3], [5, 8],
+        [6, 7], [9, 12], [10, 11],
+        [13, 16], [14, 15], [17, 20],
+        [18, 19], [21, 24], [22, 23],
+        [25, 28], [26, 27], [29, 32],
+        [30, 31],
       ]
     end
   end
