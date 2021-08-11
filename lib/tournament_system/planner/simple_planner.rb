@@ -5,11 +5,11 @@ module Planner
   module SimplePlanner
     extend self
 
-    def plan_rounds(matches, field_count)
+    def plan_rounds(driver, matches, field_count)
       rounds = []
 
       matches.each do |match|
-        round = first_available_round(match, rounds, field_count)
+        round = first_available_round(driver, match, rounds, field_count)
         if round.nil?
           round = []
           rounds.append(round)
@@ -22,14 +22,15 @@ module Planner
 
     private
 
-    def first_available_round(match, rounds, field_count)
+    def first_available_round(driver, match, rounds, field_count)
       rounds.each do |round|
         return round if match.home_team.nil? || match.away_team.nil?
 
         next if round.size >= field_count
 
         teams_in_round = round.flatten
-        next if teams_in_round.include?(match.home_team) || teams_in_round.include?(match.away_team)
+        teams_in_match = driver.get_match_teams(match)
+        next if teams_in_round.include?(teams_in_match[0]) || teams_in_round.include?(teams_in_match[1])
 
         return round
       end
