@@ -24,7 +24,7 @@ module Planner
 
     def first_available_round(driver, match, rounds, field_count)
       rounds.each do |round|
-        return round if match.home_team.nil? || match.away_team.nil?
+        return round if driver.match_bye?(match)
 
         next if round.size >= field_count
 
