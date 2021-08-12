@@ -31,6 +31,7 @@ module TournamentSystem
       if pairings.nil?
         # FIXME: Tournament must be able to continue after one lap of round robin
         raise 'No valid rounds found'
+        # pairings = match_teams(driver, teams).first # Just take the first round as a fallback
       end
 
       driver.create_matches(pairings.map(&:to_a))
@@ -77,12 +78,14 @@ module TournamentSystem
 
     # Driver proxy disregarding matches played in previous laps of round robin
     class VoetlabDriverProxy < DriverProxy
-      def get_team_matches(team)
+      def get_team_matches(team) # rubocop:disable Metrics/AbcSize
         matches = super
-        return [] if matches.count == even_team_count - 1
+        return [] if (matches.count % (even_team_count - 1)).zero?
 
-        tally = matches.tally
-        tally.select { |_m, c| c == tally.values.max }.keys
+        match_sets = matches.group_by { |match| get_match_teams(match).to_set }
+
+        current_round = match_sets.values.map(&:count).max # FIXME: Maybe use the `guess_round` function
+        match_sets.values.map { |matches_in_set| matches_in_set[current_round - 1] }.compact
       end
 
       def even_team_count
