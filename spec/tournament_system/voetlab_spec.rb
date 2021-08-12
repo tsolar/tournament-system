@@ -14,8 +14,7 @@ describe TournamentSystem::Voetlab do
                   [2, 3],]
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       expect(matches).to eq [
         [5, 3], [4, 1], [2, nil],
@@ -25,8 +24,7 @@ describe TournamentSystem::Voetlab do
     it 'and generates matches' do
       driver = SoccerTestDriver.new(teams: [1, 2, 3, 4, 5], scores: { 1 => 5, 2 => 4, 3 => 3, 4 => 2, 5 => 1 })
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       # Should match strongest teams together
       expect(matches).to eq [
@@ -40,8 +38,7 @@ describe TournamentSystem::Voetlab do
         winners: { [1, 2] => 1, [3, 4] => 3, [5, nil] => 5 }
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       # Should pit winners against winners and losers against losers
       # with a bye for the team with the lowest score
@@ -56,8 +53,7 @@ describe TournamentSystem::Voetlab do
         winners: { [1, 2] => 1, [3, 4] => 3, [5, nil] => 5, [1, 5] => 5, [4, 2] => 2, [3, nil] => 3 }
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       expect(matches).to eq [
         [5, 3], [2, nil], [1, 4],
@@ -71,8 +67,7 @@ describe TournamentSystem::Voetlab do
                    [4, nil] => 4, [2, 5] => 5, }
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       expect(matches).to eq [
         [5, 3], [1, 4], [2, nil],
@@ -86,8 +81,7 @@ describe TournamentSystem::Voetlab do
                    [4, nil] => 4, [2, 5] => 5, [1, 4] => 1, [3, 5] => 5, [2, nil] => 2, }
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       expect(matches).to eq [
         [5, 4], [1, nil], [3, 2],
@@ -106,8 +100,7 @@ describe TournamentSystem::Voetlab do
         }
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       # Since this is a new lap of round robin, teams should again be matched solely based on score
       expect(matches).to eq [
@@ -127,8 +120,7 @@ describe TournamentSystem::Voetlab do
         }
       )
 
-      matches = described_class.generate(driver, pairer: TournamentSystem::Swiss::Voetlab,
-                                                 pair_options: { push_byes_to: :lowest_score })
+      matches = described_class.generate(driver)
 
       # Since this is a new lap of round robin, teams should again be matched solely based on score
       expect(matches).to eq [
