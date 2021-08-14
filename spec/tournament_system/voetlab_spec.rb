@@ -128,6 +128,24 @@ describe TournamentSystem::Voetlab do
       ]
     end
 
+    it 'gives expected results in scenario 2' do
+      driver = SoccerTestDriver.new(
+        teams: [1, 2, 3, 4, 5, 6],
+        winners: {
+          [5, 4] => 4, [3, 2] => 3, [1, 6] => nil,
+          [4, 3] => 3, [6, 5] => 6, [1, 2] => nil,
+          # [3, 6] => nil, [4, 1] => nil, [2, 5] => 5,
+        }
+      )
+
+      matches = described_class.generate(driver)
+
+      # Since this is a new lap of round robin, teams should again be matched solely based on score
+      expect(matches).not_to eq [
+        [3, 6], [4, 1], [2, 5],
+      ]
+    end
+
     it 'works with many teams' do
       driver = TestDriver.new(
         teams: (1..32).to_a,

@@ -15,14 +15,16 @@ module TournamentSystem
     # @option options [Hash] pair_options options for the chosen pairing system,
     #                                     see {Dutch} for more details
     # @return [nil]
-    def generate(driver, _options = {}) # rubocop:disable Metrics/MethodLength
+    def generate(driver, _options = {}) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
       driver = VoetlabDriverProxy.new(driver)
 
       teams = Algorithm::Util.padd_teams_even(driver.ranked_teams)
 
       all_matches = all_matches(driver).to_a
+
+      played_matches = driver.matches.map { |m| driver.get_match_teams(m).to_set }
       rounds = match_teams(driver, teams).lazy.select do |round|
-        remaining_matches = all_matches - round
+        remaining_matches = all_matches - played_matches - round
         Algorithm::RoundRobin.matches_form_round_robin(remaining_matches)
       end
 
