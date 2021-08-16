@@ -28,7 +28,7 @@ module Planner
 
         next if round.size >= field_count
 
-        teams_in_round = round.flatten
+        teams_in_round = round.map { |m| driver.get_match_teams(m) }.flatten
         teams_in_match = driver.get_match_teams(match)
         next if teams_in_round.include?(teams_in_match[0]) || teams_in_round.include?(teams_in_match[1])
 
