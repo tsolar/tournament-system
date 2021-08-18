@@ -16,8 +16,6 @@ module TournamentSystem
     #                                     see {Dutch} for more details
     # @return [nil]
     def generate(driver, _options = {}) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-      driver = VoetlabDriverProxy.new(driver)
-
       teams = Algorithm::Util.padd_teams_even(driver.ranked_teams)
 
       all_matches = all_matches(driver).to_a
@@ -77,24 +75,5 @@ module TournamentSystem
         end
       end
     end
-
-    # Driver proxy disregarding matches played in previous laps of round robin
-    class VoetlabDriverProxy < DriverProxy
-      def get_team_matches(team) # rubocop:disable Metrics/AbcSize
-        matches = super
-        return [] if (matches.count % (even_team_count - 1)).zero?
-
-        match_sets = matches.group_by { |match| get_match_teams(match).to_set }
-
-        current_round = match_sets.values.map(&:count).max # FIXME: Maybe use the `guess_round` function
-        match_sets.values.map { |matches_in_set| matches_in_set[current_round - 1] }.compact
-      end
-
-      def even_team_count
-        (seeded_teams.count.to_f / 2).ceil * 2
-      end
-    end
-
-    private_constant :VoetlabDriverProxy
   end
 end

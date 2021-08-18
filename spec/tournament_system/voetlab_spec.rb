@@ -100,12 +100,9 @@ describe TournamentSystem::Voetlab do
         }
       )
 
-      matches = described_class.generate(driver)
-
-      # Since this is a new lap of round robin, teams should again be matched solely based on score
-      expect(matches).to eq [
-        [5, 1], [3, 2], [4, nil],
-      ]
+      expect do
+        described_class.generate(driver)
+      end.to raise_exception 'No valid rounds found'
     end
 
     it 'gives expected results in scenario 1' do
@@ -117,14 +114,15 @@ describe TournamentSystem::Voetlab do
           [1, 3] => nil, [4, 2] => nil, [5, nil] => 5,
           [1, 2] => nil, [4, 5] => 4, [3, nil] => 3,
           [1, 4] => 1, [3, 5] => nil, [2, nil] => 2,
-        }
+        },
+        matches: [[1, 4], [3, 5], [2, nil]] # After completing a round robin only the last round is considered
       )
 
       matches = described_class.generate(driver)
 
       # Since this is a new lap of round robin, teams should again be matched solely based on score
       expect(matches).to eq [
-        [4, 1], [5, 3], [2, nil],
+        [4, 5], [1, 2], [3, nil],
       ]
     end
 
