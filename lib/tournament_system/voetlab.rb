@@ -29,7 +29,6 @@ module TournamentSystem
       pairings = rounds.first
 
       if pairings.nil?
-        # FIXME: Tournament must be able to continue after one lap of round robin
         raise 'No valid rounds found'
         # pairings = match_teams(driver, teams).first # Just take the first round as a fallback
       end
